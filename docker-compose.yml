@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.3.0
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+
+  kafka:
+    image: confluentinc/cp-kafka:7.3.0
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  # ------------------------------------
+  # KAFKA EXPORTER (Consumer lag metrics)
+  # ------------------------------------
+  kafka_exporter:
+    image: danielqsj/kafka-exporter:latest
+    command:
+      - "--kafka.server=kafka:9092"
+    ports:
+      - "9308:9308"
+    depends_on:
+      - kafka
+
+  # ------------------------------------
+  # NODE EXPORTER (Container metrics)
+  # ------------------------------------
+  node_exporter:
+    image: prom/node-exporter
+    ports:
+      - "9100:9100"
+
+  # ------------------------------------
+  # PROMETHEUS
+  # ------------------------------------
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    depends_on:
+      - kafka_exporter
+      - node_exporter
+
+  # ------------------------------------
+  # GRAFANA
+  # ------------------------------------
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - prometheus
+
+  # ------------------------------------
+  # PRODUCER (Golang)
+  # ------------------------------------
+  producer_app:
+    build: ./producer_app
+    depends_on:
+      - kafka
+    environment:
+      KAFKA_BROKER_URL: kafka:9092
+
+  # ------------------------------------
+  # CONSUMER (Golang Batch Consumer)
+  # ------------------------------------
+  consumer_app:
+    build: ./consumer_app
+    depends_on:
+      - kafka
+    environment:
+      KAFKA_BROKER_URL: kafka:9092
