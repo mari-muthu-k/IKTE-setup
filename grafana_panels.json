@@ -1,0 +1,142 @@
+{
+  "id": null,
+  "uid": "kafka-e2e-dashboard",
+  "title": "Kafka End-to-End Pipeline Monitoring",
+  "description": "Producers → Kafka → Consumers (30M messages with batch delays)",
+  "timezone": "browser",
+  "schemaVersion": 36,
+  "version": 1,
+  "refresh": "5s",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Total Produced Messages",
+      "targets": [
+        {
+          "expr": "sum(producer_messages_total)",
+          "legendFormat": "Produced"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 }
+    },
+    {
+      "type": "stat",
+      "title": "Total Consumed Messages (Batches)",
+      "targets": [
+        {
+          "expr": "sum(consumer_batches_total) * 10000",
+          "legendFormat": "Consumed"
+        }
+      ],
+      "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 }
+    },
+    {
+      "type": "stat",
+      "title": "Remaining Messages (Goal: 30M)",
+      "targets": [
+        {
+          "expr": "30000000 - (sum(consumer_batches_total) * 10000)",
+          "legendFormat": "Remaining"
+        }
+      ],
+      "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 }
+    },
+    {
+      "type": "graph",
+      "title": "Producer Throughput (msg/sec)",
+      "targets": [
+        {
+          "expr": "rate(producer_messages_total[30s])",
+          "legendFormat": "Producer Rate"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 4, "w": 12, "h": 8 }
+    },
+    {
+      "type": "graph",
+      "title": "Producer Target Rate (130 msg/sec)",
+      "targets": [
+        {
+          "expr": "scalar(130)",
+          "legendFormat": "Target"
+        },
+        {
+          "expr": "rate(producer_messages_total[30s])",
+          "legendFormat": "Actual"
+        }
+      ],
+      "gridPos": { "x": 12, "y": 4, "w": 12, "h": 8 }
+    },
+    {
+      "type": "graph",
+      "title": "Kafka Consumer Lag (All Partitions)",
+      "targets": [
+        {
+          "expr": "sum(kafka_consumergroup_lag)",
+          "legendFormat": "Lag"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 12, "w": 12, "h": 8 }
+    },
+    {
+      "type": "graph",
+      "title": "Consumer Batch Processing Duration (sec)",
+      "targets": [
+        {
+          "expr": "consumer_batch_duration_seconds",
+          "legendFormat": "Batch Duration"
+        }
+      ],
+      "gridPos": { "x": 12, "y": 12, "w": 12, "h": 8 }
+    },
+    {
+      "type": "graph",
+      "title": "Consumer Batch Timing With 30-Second Delay",
+      "targets": [
+        {
+          "expr": "rate(consumer_batches_total[1m])",
+          "legendFormat": "Batch Rate"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 20, "w": 12, "h": 8 }
+    },
+    {
+      "type": "graph",
+      "title": "Kafka Topic Throughput (bytes in/out)",
+      "targets": [
+        {
+          "expr": "rate(kafka_brokers_bytes_in_total[1m])",
+          "legendFormat": "Bytes In"
+        },
+        {
+          "expr": "rate(kafka_brokers_bytes_out_total[1m])",
+          "legendFormat": "Bytes Out"
+        }
+      ],
+      "gridPos": { "x": 12, "y": 20, "w": 12, "h": 8 }
+    },
+    {
+      "type": "table",
+      "title": "Partition Distribution Across 24 Consumers",
+      "targets": [
+        {
+          "expr": "kafka_consumergroup_current_offset",
+          "legendFormat": "{{partition}}"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 28, "w": 24, "h": 8 }
+    },
+    {
+      "type": "stat",
+      "title": "Pipeline Health",
+      "targets": [
+        {
+          "expr": "sum(kafka_consumergroup_lag) < 500000 ? 1 : 0",
+          "legendFormat": "Healthy?"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 36, "w": 6, "h": 4 }
+    }
+  ],
+  "templating": { "list": [] }
+}

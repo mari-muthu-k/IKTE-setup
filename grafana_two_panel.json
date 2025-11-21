@@ -1,0 +1,61 @@
+{
+  "id": null,
+  "uid": "kafka-two-panel",
+  "title": "Kafka Published vs Consumed",
+  "tags": ["kafka", "producer", "consumer"],
+  "timezone": "browser",
+  "schemaVersion": 36,
+  "version": 1,
+  "refresh": "5s",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Total Messages Published",
+      "id": 1,
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "sum(producer_messages_total)",
+          "legendFormat": "Published"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 6 },
+      "options": {
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "horizontal"
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Total Messages Consumed",
+      "id": 2,
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "sum(consumer_batches_total) * 10000",
+          "legendFormat": "Consumed"
+        }
+      ],
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 6 },
+      "options": {
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "horizontal"
+      }
+    }
+  ],
+  "templating": { "list": [] }
+}
