@@ -1,0 +1,32 @@
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  # ----------------------
+  # Kafka Exporter
+  # ----------------------
+  - job_name: 'kafka_exporter'
+    static_configs:
+      - targets: ['kafka_exporter:9308']
+
+  # ----------------------
+  # Node Exporter
+  # ----------------------
+  - job_name: 'node_exporter'
+    static_configs:
+      - targets: ['node_exporter:9100']
+
+  # ----------------------
+  # Golang Producers
+  # (you will expose custom metrics)
+  # ----------------------
+  - job_name: 'go_producers'
+    static_configs:
+      - targets: ['producer_app:2112']
+
+  # ----------------------
+  # Golang Consumers
+  # ----------------------
+  - job_name: 'go_consumers'
+    static_configs:
+      - targets: ['consumer_app:2113']
